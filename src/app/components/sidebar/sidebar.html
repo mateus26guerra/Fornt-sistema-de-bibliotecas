@@ -1,0 +1,87 @@
+<div class="mobile-button" (click)="menuOpen = !menuOpen">
+  ☰
+</div>
+
+<div class="sidebar" [class.open]="menuOpen">
+
+  <div class="top">
+
+    <div class="logo-area">
+
+      <div class="logo">
+        R
+      </div>
+
+      <div class="logo-text">
+        <h1>ROOM</h1>
+        <p>Admin Console</p>
+      </div>
+
+    </div>
+
+    <nav>
+
+      <span class="title">
+        Navegação
+      </span>
+
+      <ul>
+
+<li routerLink="/dashboard"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+  Dashboard
+</li>
+
+<li routerLink="/users"
+    routerLinkActive="active">
+  Usuários
+</li>
+
+<li routerLink="/libraries"
+    routerLinkActive="active">
+  Bibliotecas
+</li>
+
+<li routerLink="/rooms"
+    routerLinkActive="active">
+  Salas
+</li>
+
+        <li routerLink="/reservasadm"
+            routerLinkActive="active">
+          Reservas
+        </li>
+
+        <li>
+          Configurações
+        </li>
+
+      </ul>
+
+    </nav>
+
+  </div>
+
+  <div class="bottom">
+
+    <div class="user">
+
+      <div class="avatar">
+        {{ currentUser?.name?.slice(0, 2)?.toUpperCase() || 'AD' }}
+      </div>
+
+      <div class="user-info">
+        <strong>{{ currentUser?.name || 'Administrador' }}</strong>
+        <span>{{ currentUser?.email || 'admin@room.com' }}</span>
+      </div>
+
+    </div>
+
+    <button class="logout-button" type="button" (click)="logout()">
+      Sair
+    </button>
+
+  </div>
+
+</div>

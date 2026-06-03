@@ -1,0 +1,104 @@
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="dashboard-page">
+    <div class="topbar">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Visao geral de todas as reservas das salas.</p>
+      </div>
+
+      <button routerLink="/reservasadm">
+        Nova Reserva
+      </button>
+    </div>
+
+    <div class="cards">
+      <div class="card blue">
+        <span>Total de Reservas</span>
+        <h2>{{ reservations.length }}</h2>
+      </div>
+
+      <div class="card green">
+        <span>Confirmadas</span>
+        <h2>{{ confirmedReservations }}</h2>
+      </div>
+
+      <div class="card orange">
+        <span>Reservas Hoje</span>
+        <h2>{{ todayReservations }}</h2>
+      </div>
+
+      <div class="card red">
+        <span>Canceladas</span>
+        <h2>{{ cancelledReservations }}</h2>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-header">
+        <div>
+          <h2>Reservas das Salas</h2>
+          <p>Todas as reservas cadastradas no sistema.</p>
+        </div>
+      </div>
+
+      <div class="loading-state" *ngIf="loading">
+        Carregando reservas...
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && reservations.length === 0">
+        Nenhuma reserva encontrada.
+      </div>
+
+      <div class="table-wrapper" *ngIf="!loading && reservations.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Aluno</th>
+              <th>Sala</th>
+              <th>Biblioteca</th>
+              <th>Data</th>
+              <th>Inicio</th>
+              <th>Fim</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let reservation of reservations">
+              <td>
+                <div class="student-cell">
+                  <div class="avatar-sm">
+                    {{ getStudentName(reservation).slice(0, 2).toUpperCase() }}
+                  </div>
+                  <div>
+                    <strong>{{ getStudentName(reservation) }}</strong>
+                    <span>{{ getStudentEmail(reservation) }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>{{ getRoomCode(reservation) }}</td>
+              <td>{{ getLibraryName(reservation) }}</td>
+              <td>{{ reservation.startAt | date:'dd/MM/yyyy' }}</td>
+              <td>{{ reservation.startAt | date:'HH:mm' }}</td>
+              <td>{{ reservation.endAt | date:'HH:mm' }}</td>
+              <td>
+                <span
+                  class="status"
+                  [class.confirmed]="reservation.status === 'CONFIRMED'"
+                  [class.cancelled]="reservation.status === 'CANCELLED'">
+                  {{ reservation.status === 'CONFIRMED' ? 'Confirmada' : reservation.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" *ngIf="showToast">
+  {{ toastMessage }}
+</div>

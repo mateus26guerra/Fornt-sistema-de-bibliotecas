@@ -1,0 +1,377 @@
+
+<div class="users-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <div class="users-page">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+      <div>
+
+        <h1>Usuários</h1>
+
+        <p>
+          Gerencie os usuários cadastrados no sistema ROOM.
+        </p>
+
+      </div>
+
+      <button (click)="openCreateModal()">
+        + Novo usuário
+      </button>
+
+    </div>
+
+    <!-- CARDS -->
+
+    <div class="cards">
+
+      <div class="card blue">
+
+        <span>Total de usuários</span>
+
+        <h2>
+          {{ users.length }}
+        </h2>
+
+      </div>
+
+      <div class="card green">
+
+        <span>Usuários ativos</span>
+
+        <h2>
+          {{ users.filter(u => u.active).length }}
+        </h2>
+
+      </div>
+
+      <div class="card orange">
+
+        <span>Administradores</span>
+
+        <h2>
+          {{ users.filter(u => u.role === 'ADMIN').length }}
+        </h2>
+
+      </div>
+
+    </div>
+
+    <!-- TABELA -->
+
+    <div class="table-container">
+
+      <div class="table-header">
+
+        <div>
+
+          <h2>Lista de usuários</h2>
+
+          <p>
+            Todos os usuários cadastrados.
+          </p>
+
+        </div>
+
+        <input
+          type="text"
+          placeholder="Buscar usuário..."
+        />
+
+      </div>
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Usuário</th>
+              <th>Email</th>
+              <th>Matrícula</th>
+              <th>Perfil</th>
+              <th>Status</th>
+              <th>Ações</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let user of users">
+
+              <!-- USER -->
+
+              <td>
+
+                <div class="user-cell">
+
+                  <div class="avatar">
+
+                    {{ user.name[0] }}
+
+                  </div>
+
+                  <div>
+
+                    <strong>
+                      {{ user.name }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              </td>
+
+              <!-- EMAIL -->
+
+              <td>
+
+                {{ user.email }}
+
+              </td>
+
+              <!-- MATRICULA -->
+
+              <td>
+
+                {{ user.matricula }}
+
+              </td>
+
+              <!-- ROLE -->
+
+              <td>
+
+                <span class="role">
+
+                  {{ user.role }}
+
+                </span>
+
+              </td>
+
+              <!-- STATUS -->
+
+              <td>
+
+                <span
+                  class="status"
+                  [class.active]="user.active"
+                >
+
+                  {{ user.active ? 'Ativo' : 'Inativo' }}
+
+                </span>
+
+              </td>
+
+              <!-- ACTIONS -->
+
+              <td>
+
+                <div class="actions">
+
+                  <button
+                    class="edit"
+                    (click)="openEditModal(user)"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    class="delete"
+                    (click)="deleteUser(user)"
+                  >
+                    Excluir
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div
+  class="modal-overlay"
+  *ngIf="modalOpen"
+>
+
+  <div class="modal">
+
+    <h2>
+
+      {{ editingUser ? 'Editar usuário' : 'Novo usuário' }}
+
+    </h2>
+
+    <!-- NOME -->
+
+    <div class="form-group">
+
+      <label>Nome</label>
+
+      <input
+        type="text"
+        [(ngModel)]="form.name"
+      />
+
+      <small
+        class="error"
+        *ngIf="errors.name"
+      >
+        {{ errors.name }}
+      </small>
+
+    </div>
+
+    <!-- EMAIL -->
+
+    <div class="form-group">
+
+      <label>Email</label>
+
+      <input
+        type="email"
+        [(ngModel)]="form.email"
+      />
+
+      <small
+        class="error"
+        *ngIf="errors.email"
+      >
+        {{ errors.email }}
+      </small>
+
+    </div>
+
+    <!-- CREATE ONLY -->
+
+    <ng-container *ngIf="!editingUser">
+
+      <!-- MATRICULA -->
+
+      <div class="form-group">
+
+        <label>Matrícula</label>
+
+        <input
+          type="text"
+          maxlength="8"
+          [(ngModel)]="form.matricula"
+        />
+
+        <small
+          class="error"
+          *ngIf="errors.matricula"
+        >
+          {{ errors.matricula }}
+        </small>
+
+      </div>
+
+      <!-- PASSWORD -->
+
+      <div class="form-group">
+
+        <label>Senha</label>
+
+        <input
+          type="password"
+          [(ngModel)]="form.password"
+        />
+
+        <small
+          class="error"
+          *ngIf="errors.password"
+        >
+          {{ errors.password }}
+        </small>
+
+      </div>
+
+      <!-- ROLE -->
+
+      <div class="form-group">
+
+        <label>Perfil</label>
+
+        <select [(ngModel)]="form.role">
+
+          <option value="ALUNO">
+            ALUNO
+          </option>
+
+          <option value="ADMIN">
+            ADMIN
+          </option>
+
+        </select>
+
+      </div>
+
+    </ng-container>
+
+    <!-- ACTIONS -->
+
+    <div class="modal-actions">
+
+      <button
+        class="cancel"
+        (click)="modalOpen = false"
+      >
+        Cancelar
+      </button>
+
+<button
+  class="save"
+  (click)="saveUser()"
+  [disabled]="loading"
+>
+
+  {{ loading ? 'Salvando...' : 'Salvar' }}
+
+</button>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- TOAST -->
+
+<div
+  class="toast"
+  [class.success]="toastType === 'success'"
+  [class.error-toast]="toastType === 'error'"
+  *ngIf="showToast"
+>
+
+  {{ toastMessage }}
+
+</div>
+

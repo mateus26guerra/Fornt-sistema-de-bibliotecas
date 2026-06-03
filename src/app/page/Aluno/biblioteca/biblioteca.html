@@ -1,0 +1,392 @@
+<div class="reserva-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-text">
+      <span class="header-eyebrow">UniAcademic</span>
+      <h1>Reserva de Salas</h1>
+      <p>Selecione uma biblioteca, escolha sua sala e confirme o horário.</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat-pill">
+        <span class="stat-dot green"></span>
+        {{ availableRooms }} salas disponíveis
+      </div>
+      <div class="stat-pill">
+        <span class="stat-dot blue"></span>
+        {{ reservations.length }} reservas ativas
+      </div>
+      <button class="logout-btn" type="button" (click)="logout()">
+        Sair
+      </button>
+    </div>
+  </div>
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step" [class.active]="currentStep >= 1" [class.done]="currentStep > 1">
+      <div class="step-circle">
+        <span *ngIf="currentStep <= 1">1</span>
+        <svg *ngIf="currentStep > 1" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8l3.5 3.5L13 4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span>Biblioteca</span>
+    </div>
+    <div class="step-line" [class.done]="currentStep > 1"></div>
+    <div class="step" [class.active]="currentStep >= 2" [class.done]="currentStep > 2">
+      <div class="step-circle">
+        <span *ngIf="currentStep <= 2">2</span>
+        <svg *ngIf="currentStep > 2" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8l3.5 3.5L13 4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span>Sala</span>
+    </div>
+    <div class="step-line" [class.done]="currentStep > 2"></div>
+    <div class="step" [class.active]="currentStep >= 3">
+      <div class="step-circle">3</div>
+      <span>Confirmar</span>
+    </div>
+  </div>
+
+  <!-- ========================
+       STEP 1 — BIBLIOTECAS
+       ======================== -->
+  <div class="step-section" *ngIf="currentStep === 1">
+    <div class="section-label">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      Selecione uma Biblioteca
+    </div>
+
+    <div class="library-grid" *ngIf="!loadingLibraries">
+      <div
+        class="library-card"
+        *ngFor="let lib of libraries"
+        [class.selected]="selectedLibrary?.id === lib.id"
+        (click)="selectLibrary(lib)"
+      >
+        <div class="lib-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </div>
+        <div class="lib-info">
+          <h3>{{ lib.name }}</h3>
+          <p class="lib-owner">{{ lib.ownerName }}</p>
+        </div>
+        <span class="lib-badge" [class.active]="lib.status === 'ACTIVE'">
+          {{ lib.status === 'ACTIVE' ? 'Ativa' : 'Inativa' }}
+        </span>
+        <div class="lib-check" *ngIf="selectedLibrary?.id === lib.id">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8l3.5 3.5L13 4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loadingLibraries">
+      <div class="spinner"></div>
+      <span>Carregando bibliotecas...</span>
+    </div>
+
+    <div class="step-actions">
+      <button class="btn-primary" [disabled]="!selectedLibrary" (click)="goToStep(2)">
+        Próximo: Escolher Sala
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================
+       STEP 2 — SALAS
+       ======================== -->
+  <div class="step-section" *ngIf="currentStep === 2">
+    <div class="breadcrumb">
+      <button class="back-btn" (click)="goToStep(1)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Voltar
+      </button>
+      <span class="breadcrumb-lib">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        {{ selectedLibrary?.name }}
+      </span>
+    </div>
+
+    <div class="section-label">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
+      </svg>
+      Salas Disponíveis
+    </div>
+
+    <div class="rooms-grid" *ngIf="!loadingRooms">
+      <div
+        class="room-card"
+        *ngFor="let room of filteredRooms"
+        [class.selected]="selectedRoom?.id === room.id"
+        [class.unavailable]="room.status !== 'AVAILABLE'"
+        (click)="room.status === 'AVAILABLE' && selectRoom(room)"
+      >
+        <div class="room-header">
+          <div class="room-code">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+            {{ room.code }}
+          </div>
+          <span class="room-status" [class.available]="room.status === 'AVAILABLE'" [class.unavailable]="room.status !== 'AVAILABLE'">
+            <span class="status-dot"></span>
+            {{ room.status === 'AVAILABLE' ? 'Disponível' : 'Indisponível' }}
+          </span>
+        </div>
+
+        <div class="room-capacity">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          {{ room.capacity }} pessoas
+        </div>
+
+        <div class="room-features">
+          <span class="feature" *ngIf="room.hasProjector">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M2 12h3m14 0h3M12 2v3m0 14v3"/>
+            </svg>
+            Projetor
+          </span>
+          <span class="feature" *ngIf="room.hasFrame">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+            Quadro
+          </span>
+          <span class="feature" *ngIf="room.hasCold">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/>
+            </svg>
+            Ar-cond.
+          </span>
+          <span class="feature" *ngIf="room.hasComputers">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+            PCs
+          </span>
+        </div>
+
+        <div class="room-select-hint" *ngIf="room.status === 'AVAILABLE'">
+          {{ selectedRoom?.id === room.id ? '✓ Selecionada' : 'Clique para selecionar' }}
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loadingRooms && filteredRooms.length === 0">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M9 9h6M9 12h6M9 15h4"/>
+      </svg>
+      <p>Nenhuma sala encontrada nesta biblioteca.</p>
+    </div>
+
+    <div class="loading-state" *ngIf="loadingRooms">
+      <div class="spinner"></div>
+      <span>Carregando salas...</span>
+    </div>
+
+    <div class="step-actions">
+      <button class="btn-secondary" (click)="goToStep(1)">Voltar</button>
+      <button class="btn-primary" [disabled]="!selectedRoom" (click)="goToStep(3)">
+        Próximo: Confirmar Reserva
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================
+       STEP 3 — CONFIRMAR
+       ======================== -->
+  <div class="step-section" *ngIf="currentStep === 3">
+    <div class="breadcrumb">
+      <button class="back-btn" (click)="goToStep(2)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Voltar
+      </button>
+    </div>
+
+    <div class="confirm-layout">
+
+      <!-- FORMULÁRIO -->
+      <div class="confirm-form">
+        <div class="section-label">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          Horário da Reserva
+        </div>
+
+        <div class="form-row">
+          <div class="group">
+            <label>Data</label>
+            <input type="date" [min]="today" [(ngModel)]="selectedDate" (change)="onDateChange()" />
+          </div>
+        </div>
+
+        <div class="form-row two-cols">
+          <div class="group">
+            <label>Hora Inicial</label>
+            <input type="time" [(ngModel)]="startTime" (change)="calcEndTime()" />
+          </div>
+          <div class="group">
+            <label>Hora Final <span class="auto-tag">automático</span></label>
+            <input type="time" [(ngModel)]="endTime" readonly />
+          </div>
+        </div>
+
+        <p class="duration-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          </svg>
+          Duração fixa de 1 hora por reserva.
+        </p>
+      </div>
+
+      <!-- RESUMO -->
+      <div class="summary-card">
+        <div class="summary-title">Resumo da Reserva</div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            Biblioteca
+          </span>
+          <span class="summary-value">{{ selectedLibrary?.name }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+            Sala
+          </span>
+          <span class="summary-value">{{ selectedRoom?.code }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            </svg>
+            Capacidade
+          </span>
+          <span class="summary-value">{{ selectedRoom?.capacity }} pessoas</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+            Data
+          </span>
+          <span class="summary-value">{{ selectedDate | date:'dd/MM/yyyy':'':'pt' }}</span>
+        </div>
+
+        <div class="summary-time">
+          <div class="time-block">
+            <span class="time-label">Início</span>
+            <span class="time-value">{{ startTime }}</span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+          <div class="time-block">
+            <span class="time-label">Fim</span>
+            <span class="time-value">{{ endTime }}</span>
+          </div>
+        </div>
+
+        <button class="btn-confirm" (click)="reserveRoom()" [disabled]="submitting">
+          <span *ngIf="!submitting">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            Confirmar Reserva
+          </span>
+          <span *ngIf="submitting">
+            <div class="spinner-sm"></div>
+            Processando...
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================
+       MINHAS RESERVAS
+       ======================== -->
+  <div class="reservations-section" *ngIf="reservations.length > 0">
+    <div class="section-label">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      Minhas Reservas
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Sala</th>
+            <th>Data</th>
+            <th>Início</th>
+            <th>Fim</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of reservations">
+            <td>{{ r.roomId }}</td>
+            <td>{{ r.startAt | date:'dd/MM/yyyy' }}</td>
+            <td>{{ r.startAt | date:'HH:mm' }}</td>
+            <td>{{ r.endAt | date:'HH:mm' }}</td>
+            <td>
+              <span class="badge-status" [class.confirmed]="r.status === 'CONFIRMED'" [class.cancelled]="r.status === 'CANCELLED'">
+                {{ r.status === 'CONFIRMED' ? 'Confirmada' : r.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" [class.success]="toastType === 'success'" [class.error]="toastType === 'error'" *ngIf="showToast">
+  <svg *ngIf="toastType === 'success'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M20 6L9 17l-5-5"/>
+  </svg>
+  <svg *ngIf="toastType === 'error'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
+  </svg>
+  {{ toastMessage }}
+</div>

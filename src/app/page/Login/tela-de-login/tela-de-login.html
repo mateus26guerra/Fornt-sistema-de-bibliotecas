@@ -1,0 +1,74 @@
+<div class="login-container">
+
+  <div class="background"></div>
+
+  <div class="login-content">
+
+    <div class="logo-area">
+      <div class="logo">R</div>
+
+      <div>
+        <h1>ROOM</h1>
+        <p>Reserva de salas</p>
+      </div>
+    </div>
+
+    <div class="card">
+
+      <h2>Entrar na sua conta</h2>
+
+      <span>
+        Use seu e-mail institucional para continuar.
+      </span>
+
+      <form (ngSubmit)="login()">
+
+        <div class="input-group">
+
+          <label>E-mail</label>
+
+          <input
+            type="email"
+            placeholder="voce@room.edu"
+            name="email"
+            [(ngModel)]="email"
+          />
+
+        </div>
+
+        <div class="input-group">
+
+          <div class="password-header">
+            <label>Senha</label>
+
+            <a href="#">Esqueceu a senha?</a>
+          </div>
+
+          <input
+            type="password"
+            placeholder="********"
+            name="password"
+            [(ngModel)]="password"
+          />
+
+        </div>
+
+        <span class="error-message" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </span>
+
+        <button type="submit" [disabled]="loading">
+          {{ loading ? 'Entrando...' : 'Entrar ->' }}
+        </button>
+
+      </form>
+
+    </div>
+
+    <footer>
+      &copy; 2026 ROOM. Todos os direitos reservados.
+    </footer>
+
+  </div>
+
+</div>

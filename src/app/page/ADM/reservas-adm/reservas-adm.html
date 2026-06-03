@@ -1,0 +1,238 @@
+<div class="reservas-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="reserva-page">
+    <div class="page-header">
+      <div class="header-text">
+        <span class="header-eyebrow">Admin Console</span>
+        <h1>Reservas</h1>
+        <p>Reserve uma sala para um aluno.</p>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-pill">
+          <span class="stat-dot green"></span>
+          {{ availableRooms }} salas disponiveis
+        </div>
+        <div class="stat-pill">
+          <span class="stat-dot blue"></span>
+          {{ students.length }} alunos
+        </div>
+        <div class="stat-pill">
+          <span class="stat-dot orange"></span>
+          {{ reservations.length }} reservas
+        </div>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <div class="step" [class.active]="currentStep >= 1" [class.done]="currentStep > 1">
+        <div class="step-circle">1</div>
+        <span>Biblioteca</span>
+      </div>
+      <div class="step-line" [class.done]="currentStep > 1"></div>
+      <div class="step" [class.active]="currentStep >= 2" [class.done]="currentStep > 2">
+        <div class="step-circle">2</div>
+        <span>Sala</span>
+      </div>
+      <div class="step-line" [class.done]="currentStep > 2"></div>
+      <div class="step" [class.active]="currentStep >= 3" [class.done]="currentStep > 3">
+        <div class="step-circle">3</div>
+        <span>Aluno</span>
+      </div>
+      <div class="step-line" [class.done]="currentStep > 3"></div>
+      <div class="step" [class.active]="currentStep >= 4">
+        <div class="step-circle">4</div>
+        <span>Confirmar</span>
+      </div>
+    </div>
+
+    <div class="step-section" *ngIf="currentStep === 1">
+      <div class="section-label">Selecione uma Biblioteca</div>
+
+      <div class="library-grid" *ngIf="!loadingLibraries">
+        <div
+          class="library-card"
+          *ngFor="let lib of libraries"
+          [class.selected]="selectedLibrary?.id === lib.id"
+          (click)="selectLibrary(lib)"
+        >
+          <div class="lib-icon">B</div>
+          <div class="lib-info">
+            <h3>{{ lib.name }}</h3>
+            <p>{{ lib.ownerName || lib.email }}</p>
+          </div>
+          <span class="lib-badge" [class.active]="lib.status === 'ACTIVE'">
+            {{ lib.status === 'ACTIVE' ? 'Ativa' : 'Inativa' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="loading-state" *ngIf="loadingLibraries">Carregando bibliotecas...</div>
+
+      <div class="step-actions">
+        <button class="btn-primary" [disabled]="!selectedLibrary" (click)="goToStep(2)">
+          Proximo: Escolher Sala
+        </button>
+      </div>
+    </div>
+
+    <div class="step-section" *ngIf="currentStep === 2">
+      <div class="breadcrumb">
+        <button class="back-btn" (click)="goToStep(1)">Voltar</button>
+        <span class="breadcrumb-chip">{{ selectedLibrary?.name }}</span>
+      </div>
+
+      <div class="section-label">Salas Disponiveis</div>
+
+      <div class="rooms-grid" *ngIf="!loadingRooms">
+        <div
+          class="room-card"
+          *ngFor="let room of filteredRooms"
+          [class.selected]="selectedRoom?.id === room.id"
+          [class.unavailable]="room.status !== 'AVAILABLE'"
+          (click)="room.status === 'AVAILABLE' && selectRoom(room)"
+        >
+          <div class="room-header">
+            <strong>{{ room.code }}</strong>
+            <span class="room-status" [class.available]="room.status === 'AVAILABLE'">
+              {{ room.status === 'AVAILABLE' ? 'Disponivel' : 'Indisponivel' }}
+            </span>
+          </div>
+
+          <p>{{ room.capacity }} pessoas</p>
+
+          <div class="room-features">
+            <span *ngIf="room.hasProjector">Projetor</span>
+            <span *ngIf="room.hasFrame">Quadro</span>
+            <span *ngIf="room.hasCold">Ar-cond.</span>
+            <span *ngIf="room.hasComputers">PCs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!loadingRooms && filteredRooms.length === 0">
+        Nenhuma sala encontrada nesta biblioteca.
+      </div>
+
+      <div class="loading-state" *ngIf="loadingRooms">Carregando salas...</div>
+
+      <div class="step-actions">
+        <button class="btn-secondary" (click)="goToStep(1)">Voltar</button>
+        <button class="btn-primary" [disabled]="!selectedRoom" (click)="goToStep(3)">
+          Proximo: Escolher Aluno
+        </button>
+      </div>
+    </div>
+
+    <div class="step-section" *ngIf="currentStep === 3">
+      <div class="breadcrumb">
+        <button class="back-btn" (click)="goToStep(2)">Voltar</button>
+        <span class="breadcrumb-chip">{{ selectedRoom?.code }}</span>
+      </div>
+
+      <div class="section-label">Selecione o Aluno</div>
+
+      <div class="students-grid" *ngIf="!loadingStudents">
+        <div
+          class="student-card"
+          *ngFor="let student of students"
+          [class.selected]="selectedStudent?.id === student.id"
+          (click)="selectStudent(student)"
+        >
+          <div class="student-avatar">{{ student.name?.slice(0, 2).toUpperCase() }}</div>
+          <div>
+            <h3>{{ student.name }}</h3>
+            <p>{{ student.email }}</p>
+            <small>Matricula: {{ student.matricula }}</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!loadingStudents && students.length === 0">
+        Nenhum aluno ativo encontrado.
+      </div>
+
+      <div class="loading-state" *ngIf="loadingStudents">Carregando alunos...</div>
+
+      <div class="step-actions">
+        <button class="btn-secondary" (click)="goToStep(2)">Voltar</button>
+        <button class="btn-primary" [disabled]="!selectedStudent" (click)="goToStep(4)">
+          Proximo: Confirmar Reserva
+        </button>
+      </div>
+    </div>
+
+    <div class="step-section" *ngIf="currentStep === 4">
+      <div class="breadcrumb">
+        <button class="back-btn" (click)="goToStep(3)">Voltar</button>
+      </div>
+
+      <div class="confirm-layout">
+        <div class="confirm-form">
+          <div class="section-label">Horario da Reserva</div>
+
+          <div class="form-row">
+            <div class="group">
+              <label>Data</label>
+              <input type="date" [min]="today" [(ngModel)]="selectedDate" (change)="onDateChange()" />
+            </div>
+          </div>
+
+          <div class="form-row two-cols">
+            <div class="group">
+              <label>Hora Inicial</label>
+              <input type="time" [(ngModel)]="startTime" (change)="calcEndTime()" />
+            </div>
+            <div class="group">
+              <label>Hora Final <span class="auto-tag">automatico</span></label>
+              <input type="time" [(ngModel)]="endTime" readonly />
+            </div>
+          </div>
+
+          <p class="duration-note">Duracao fixa de 1 hora por reserva.</p>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-title">Resumo da Reserva</div>
+
+          <div class="summary-item">
+            <span>Aluno</span>
+            <strong>{{ selectedStudent?.name }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Biblioteca</span>
+            <strong>{{ selectedLibrary?.name }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Sala</span>
+            <strong>{{ selectedRoom?.code }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Data</span>
+            <strong>{{ selectedDate | date:'dd/MM/yyyy':'':'pt' }}</strong>
+          </div>
+
+          <div class="summary-time">
+            <div>
+              <span>Inicio</span>
+              <strong>{{ startTime }}</strong>
+            </div>
+            <div>
+              <span>Fim</span>
+              <strong>{{ endTime }}</strong>
+            </div>
+          </div>
+
+          <button class="btn-confirm" (click)="reserveRoom()" [disabled]="submitting">
+            {{ submitting ? 'Processando...' : 'Confirmar Reserva' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" [class.success]="toastType === 'success'" [class.error]="toastType === 'error'" *ngIf="showToast">
+  {{ toastMessage }}
+</div>

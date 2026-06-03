@@ -1,0 +1,265 @@
+<div class="rooms-layout">
+
+<app-sidebar></app-sidebar>
+
+  <div class="rooms-page">
+
+<div class="topbar">
+
+  <div>
+    <h1>Salas</h1>
+    <p>Gerencie todas as salas da biblioteca.</p>
+  </div>
+
+  <button (click)="openCreateModal()">
+    + Nova Sala
+  </button>
+
+</div>
+
+<div class="cards">
+
+  <div class="card blue">
+    <span>Total de Salas</span>
+    <h2>{{ rooms.length }}</h2>
+  </div>
+
+  <div class="card green">
+    <span>Disponíveis</span>
+    <h2>{{ rooms.filter(r => r.status === 'AVAILABLE').length }}</h2>
+  </div>
+
+  <div class="card orange">
+    <span>Com Projetor</span>
+    <h2>{{ rooms.filter(r => r.hasProjector).length }}</h2>
+  </div>
+
+</div>
+
+<div class="table-container">
+
+  <div class="table-header">
+
+    <div>
+      <h2>Lista de Salas</h2>
+      <p>Todas as salas cadastradas.</p>
+    </div>
+
+  </div>
+
+  <div class="table-wrapper">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Capacidade</th>
+          <th>Biblioteca</th>
+          <th>Projetor</th>
+          <th>Ar</th>
+          <th>PCs</th>
+          <th>Quadro</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let room of rooms">
+
+          <td>{{ room.code }}</td>
+
+          <td>{{ room.capacity }}</td>
+
+          <td>{{ room.library?.name }}</td>
+
+          <td>{{ room.hasProjector ? '✅' : '❌' }}</td>
+
+          <td>{{ room.hasCold ? '✅' : '❌' }}</td>
+
+          <td>{{ room.hasComputers ? '✅' : '❌' }}</td>
+
+          <td>{{ room.hasFrame ? '✅' : '❌' }}</td>
+
+          <td>
+
+            <span
+              class="status"
+              [class.available]="room.status === 'AVAILABLE'"
+              [class.unavailable]="room.status !== 'AVAILABLE'">
+
+              {{ room.status }}
+
+            </span>
+
+          </td>
+
+          <td>
+
+            <div class="actions">
+
+              <button
+                class="edit"
+                (click)="openEditModal(room)">
+                Editar
+              </button>
+
+              <button
+                class="delete"
+                (click)="deleteRoom(room)">
+                Excluir
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+  </div>
+
+</div>
+
+<div
+  class="modal-overlay"
+  *ngIf="modalOpen">
+
+  <div class="modal">
+
+<h2>
+  {{ editingRoom ? ' Editar Sala' : ' Nova Sala' }}
+</h2>
+
+<div class="form-group">
+
+  <label>Código da Sala</label>
+
+  <input
+    type="text"
+    [(ngModel)]="form.code">
+
+</div>
+
+<div class="form-group">
+
+  <label>Capacidade</label>
+
+  <input
+    type="number"
+    [(ngModel)]="form.capacity">
+
+</div>
+
+<div class="form-group">
+
+  <label>Biblioteca</label>
+
+  <select [(ngModel)]="form.libraryId">
+
+    <option value="">
+      Selecione uma biblioteca
+    </option>
+
+    <option
+      *ngFor="let library of libraries"
+      [value]="library.id">
+
+      {{ library.name }}
+
+    </option>
+
+  </select>
+
+</div>
+
+<div class="form-group">
+
+  <label>Status</label>
+
+  <select [(ngModel)]="form.status">
+
+    <option value="AVAILABLE">
+      Disponível
+    </option>
+
+    <option value="UNAVAILABLE">
+      Indisponível
+    </option>
+
+  </select>
+
+</div>
+
+<h3>Recursos da Sala</h3>
+
+<div class="checkbox-grid">
+
+  <label>
+    <input
+      type="checkbox"
+      [(ngModel)]="form.hasProjector">
+    Projetor
+  </label>
+
+  <label>
+    <input
+      type="checkbox"
+      [(ngModel)]="form.hasCold">
+    Ar-condicionado
+  </label>
+
+  <label>
+    <input
+      type="checkbox"
+      [(ngModel)]="form.hasComputers">
+    Computadores
+  </label>
+
+  <label>
+    <input
+      type="checkbox"
+      [(ngModel)]="form.hasFrame">
+    Quadro
+  </label>
+
+</div>
+
+<div class="modal-actions">
+
+  <button
+    class="cancel"
+    (click)="closeModal()">
+    Cancelar
+  </button>
+
+  <button
+    class="save"
+    (click)="editingRoom ? updateRoom() : saveRoom()">
+
+    {{ editingRoom ? 'Atualizar' : 'Salvar' }}
+
+  </button>
+
+</div>
+
+
+  </div>
+
+</div>
+
+<div
+  class="toast"
+  *ngIf="showToast">
+
+{{ toastMessage }}
+
+</div>
